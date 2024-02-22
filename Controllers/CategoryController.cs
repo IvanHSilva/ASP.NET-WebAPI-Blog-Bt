@@ -1,14 +1,17 @@
 ﻿using BlogEFCore.Data;
 using BlogEFCore.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Blog.Controllers; 
+namespace Blog.Controllers;
 
+[ApiController]
+[Route("v1")]
 public class CategoryController : ControllerBase {
 
     [HttpGet("categories")]
-    public IActionResult SelectAll([FromServices] DataContext context) {
-        List<Category> categories = [.. context.Categories];
+    public async Task<IActionResult> SelectAll ([FromServices] DataContext context) {
+        List<Category> categories = await context.Categories.ToListAsync();
         return Ok(categories);
     }
 }
