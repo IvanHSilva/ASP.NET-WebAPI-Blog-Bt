@@ -1,4 +1,5 @@
-﻿using BlogEFCore.Data;
+﻿using Blog.ViewModels;
+using BlogEFCore.Data;
 using BlogEFCore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +26,13 @@ public class CategoryController : ControllerBase {
     }
 
     [HttpPost("categories")]
-    public async Task<IActionResult> Post([FromBody] Category model, [FromServices] DataContext context) {
+    public async Task<IActionResult> Post([FromBody] CategoryViewModel model, [FromServices] DataContext context) {
         try {
-            await context.Categories.AddAsync(model);
+            Category category = new() { Name = model.Name, Slug = model.Slug.ToLower()};
+            await context.Categories.AddAsync(category);
             await context.SaveChangesAsync();
 
-            return Created($"categories/{model.Id}", model);
+            return Created($"categories/{category.Id}", category);
         } catch (DbUpdateException dbex) {
             return StatusCode(500, $"Erro ao inserir categoria: {dbex}");
         } catch (Exception ex) {
@@ -39,13 +41,13 @@ public class CategoryController : ControllerBase {
     }
 
     [HttpPut("categories/{id:int}")]
-    public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Category model, 
+    public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CategoryViewModel model, 
         [FromServices] DataContext context) {
         Category category = await context.Categories.FirstAsync(c => c.Id == id);
         if (category == null) return NotFound();
 
-        category.Name = model.Name;
-        category.Slug = model.Slug;
+        category.Name = model.Name!;
+        category.Slug = model.Slug!;
 
         context.Categories.Update(category);
         await context.SaveChangesAsync();
