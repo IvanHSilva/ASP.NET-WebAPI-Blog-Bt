@@ -18,7 +18,7 @@ public class CategoryController : ControllerBase {
 
     [HttpGet("categories/{id:int}")]
     public async Task<IActionResult> Get ([FromRoute] int id, [FromServices] DataContext context) {
-        Category category = await context.Categories.FirstAsync(c => c.Id == id);
+        Category? category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null) return NotFound();
         
         return Ok(category);
@@ -26,10 +26,16 @@ public class CategoryController : ControllerBase {
 
     [HttpPost("categories")]
     public async Task<IActionResult> Post([FromBody] Category model, [FromServices] DataContext context) {
-        await context.Categories.AddAsync(model);
-        await context.SaveChangesAsync();
+        try {
+            await context.Categories.AddAsync(model);
+            await context.SaveChangesAsync();
 
-        return Created($"categories/{model.Id}", model);
+            return Created($"categories/{model.Id}", model);
+        } catch (DbUpdateException dbex) {
+            return StatusCode(500, $"Erro ao inserir categoria: {dbex}");
+        } catch (Exception ex) {
+            return StatusCode(500, $"Falha interna do servidor: {ex}");
+        }
     }
 
     [HttpPut("categories/{id:int}")]
