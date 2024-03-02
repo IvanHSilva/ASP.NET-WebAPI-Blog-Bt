@@ -17,7 +17,8 @@ public class AccountController : ControllerBase {
     public async Task<IActionResult> Post([FromBody]RegisterViewModel model,
         [FromServices]DataContext context) {
 
-        if (!ModelState.IsValid) return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
+        if (!ModelState.IsValid) 
+            return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
 
         User user = new() {
             Name = model.Name,
@@ -40,11 +41,28 @@ public class AccountController : ControllerBase {
 
     //[AllowAnonymous]
     [HttpPost("accounts/login")]
-    public IActionResult Login([FromServices]TokenService tokenService) { 
-    
-        string token = tokenService.GenerateToken(null!);
+    public async Task<IActionResult> Login([FromBody]LoginViewModel model,
+        [FromServices] DataContext context, 
+        [FromServices]TokenService tokenService) {
+
+        if (!ModelState.IsValid) 
+            return BadRequest(new ResultViewModel<string>(ModelState.GetErrors())); 
         
-        return Ok(token); 
+        User? user = await context.Users.AsNoTracking().Include(u => u.Roles).
+            FirstOrDefaultAsync(u => u.Email == model.Email);
+
+        if (user == null)
+            return StatusCode(401, new ResultViewModel<string>("Usuário ou senha inválidos!"));
+
+        if (!PasswordHasher.Verify(user.PasswordHash, model.Password))
+            return StatusCode(401, new ResultViewModel<string>("Usuário ou senha inválidos!"));
+
+        try { 
+            string token = tokenService.GenerateToken(user);
+            return Ok(new ResultViewModel<string>(token, null!));
+        } catch (DbUpdateException) {
+            return StatusCode(500, new ResultViewModel<string>("Falha interna do servidor"));
+        }
     }
 
     //[Authorize(Roles = "user")]
