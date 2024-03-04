@@ -1,4 +1,5 @@
-﻿using BlogEFCore.Models;
+﻿using Blog.Extensions;
+using BlogEFCore.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,12 +13,10 @@ public class TokenService {
 
         JwtSecurityTokenHandler tokenHandler = new();
         byte[] key = Encoding.ASCII.GetBytes(Configuration.JwtKey);
+        IEnumerable<Claim> claims = user.GetClaims();
+
         SecurityTokenDescriptor tokenDescriptor = new(){
-            Subject = new ClaimsIdentity(new Claim[]{
-                new (ClaimTypes.Name, "ivanhenriques"), // User.Identity.Name
-                new (ClaimTypes.Role, "user"),          // User.IsInRole
-                new (ClaimTypes.Role, "admin"),
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddHours(8),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key), 

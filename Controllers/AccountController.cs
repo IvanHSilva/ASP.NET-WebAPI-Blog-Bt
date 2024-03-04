@@ -41,9 +41,9 @@ public class AccountController : ControllerBase {
 
     //[AllowAnonymous]
     [HttpPost("accounts/login")]
-    public async Task<IActionResult> Login([FromBody]LoginViewModel model,
+    public async Task<IActionResult> Login([FromBody] LoginViewModel model,
         [FromServices] DataContext context, 
-        [FromServices]TokenService tokenService) {
+        [FromServices] TokenService tokenService) {
 
         if (!ModelState.IsValid) 
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors())); 
