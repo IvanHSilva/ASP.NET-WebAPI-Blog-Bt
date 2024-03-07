@@ -10,6 +10,6 @@ public class User
     public string Image { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
 
-    public IList<Post> Posts { get; set; } = null!;
-    public IList<Role> Roles { get; set; } = null!;
+    public IList<Post> Posts { get; set; } = default!;
+    public IList<Role> Roles { get; set; } = default!;
 }

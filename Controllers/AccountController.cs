@@ -48,8 +48,8 @@ public class AccountController : ControllerBase {
         if (!ModelState.IsValid) 
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors())); 
         
-        User? user = await context.Users.AsNoTracking().Include(u => u.Roles).
-            FirstOrDefaultAsync(u => u.Email == model.Email);
+        User user = await context.Users.AsNoTracking(). //Include(u => u.Roles).
+            FirstAsync(u => u.Email == model.Email);
 
         if (user == null)
             return StatusCode(401, new ResultViewModel<string>("Usuário ou senha inválidos!"));

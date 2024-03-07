@@ -34,8 +34,15 @@ builder.Services.AddTransient<TokenService>();
 //Console.WriteLine(guid.ToString());
 
 var app = builder.Build();
+Configuration.JwtKey = app.Configuration.GetValue<string>("JwtKey")!;
+Configuration.ApiKeyName = app.Configuration.GetValue<string>("ApiKeyName")!;
+Configuration.ApiKey = app.Configuration.GetValue<string>("ApiKey")!;
 
-app.UseHttpsRedirection();
+var smtp = new Configuration.SmtpConfiguration();
+app.Configuration.GetSection("Smtp").Bind(smtp);
+Configuration.Smtp = smtp;
+
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
