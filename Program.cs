@@ -60,4 +60,5 @@ void ConfigureMvc(WebApplicationBuilder builder) {
 void ConfigureServices(WebApplicationBuilder builder) {
     builder.Services.AddDbContext<DataContext>();
     builder.Services.AddTransient<TokenService>();
+    builder.Services.AddTransient<EmailService>();
 }
