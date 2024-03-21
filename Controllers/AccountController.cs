@@ -15,7 +15,7 @@ public class AccountController : ControllerBase {
 
     [HttpPost("accounts")]
     public async Task<IActionResult> Post([FromBody]RegisterViewModel model,
-        [FromServices]DataContext context) {
+        [FromServices] EmailService emailService, [FromServices]DataContext context) {
 
         if (!ModelState.IsValid) 
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
@@ -33,7 +33,13 @@ public class AccountController : ControllerBase {
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            return Ok(new ResultViewModel<dynamic>(new { user = user.Email, password }));
+            emailService.Send(user.Name, user.Email, "Bem-vindo ao nosso blog.",
+                $"Sua senha é {password}");
+
+            return Ok(new ResultViewModel<dynamic>(new {
+                user = user.Email, password 
+            }));
+
         } catch (DbUpdateException) {
             return StatusCode(400, new ResultViewModel<string>("E-Mail ja cadastrado"));
         }
