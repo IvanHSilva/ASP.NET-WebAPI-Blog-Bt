@@ -1,11 +1,14 @@
 ﻿using Blog.Extensions;
 using Blog.Services;
 using Blog.ViewModels;
+using Blog.ViewModels.Accounts;
 using BlogEFCore.Data;
 using BlogEFCore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SecureIdentity.Password;
+using System.Text.RegularExpressions;
 
 namespace Blog.Controllers;
 
@@ -71,15 +74,49 @@ public class AccountController : ControllerBase {
         }
     }
 
-    //[Authorize(Roles = "user")]
-    //[HttpGet("user")]
-    //public IActionResult GetUser() => Ok(User.Identity!.Name);
+    [Authorize]
+    [HttpPost("accounts/upload-image")]
+    public async Task<IActionResult> UploadImage(
+        [FromBody] UploadImageViewModel model,
+        [FromServices] DataContext context) {
 
-    //[Authorize(Roles = "author")]
-    //[HttpGet("author")]
-    //public IActionResult GetAuthor() => Ok(User.Identity!.Name);
+        string fileName = $"{Guid.NewGuid().ToString()}.jpg";
+        string data = new Regex(@"^data image[a-z]+;base64,").
+            Replace(model.Base64Image, "");
+        byte[] bytes = Convert.FromBase64String(data);
 
-    //[Authorize(Roles = "admin")]
-    //[HttpGet("admin")]
-    //public IActionResult GetAdmin() => Ok(User.Identity!.Name);
-}
+        try {
+            await System.IO.File.WriteAllBytesAsync($"wwwroot/images/{fileName}", bytes);
+        } catch {
+            return StatusCode(500, new ResultViewModel<string>
+                ("Falha interna do servidor"));
+        }
+
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
+
+        if (user == null) return NotFound(new ResultViewModel<Category>("Usuário não encontrado"));
+
+        user.Image = $"https://localhost:0000/images/{fileName}";
+
+        try {
+            context.Users.Update(user);
+            await context.SaveChangesAsync();
+        } catch {
+            return StatusCode(500, new ResultViewModel<string>
+                ("Falha interna do servidor"));
+        }
+
+        return Ok(new ResultViewModel<string>("Imagem alterada com sucesso!"));
+
+        //[Authorize(Roles = "user")]
+        //[HttpGet("user")]
+        //public IActionResult GetUser() => Ok(User.Identity!.Name);
+
+        //[Authorize(Roles = "author")]
+        //[HttpGet("author")]
+        //public IActionResult GetAuthor() => Ok(User.Identity!.Name);
+
+        //[Authorize(Roles = "admin")]
+        //[HttpGet("admin")]
+        //public IActionResult GetAdmin() => Ok(User.Identity!.Name);
+    }

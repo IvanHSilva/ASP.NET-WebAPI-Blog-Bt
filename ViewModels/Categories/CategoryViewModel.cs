@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Blog.ViewModels; 
+namespace Blog.ViewModels.Categories;
 
-public class CategoryViewModel {
+public class CategoryViewModel
+{
     [Required(ErrorMessage = "Nome obrigatório")]
     [MinLength(5, ErrorMessage = "Nome deve ter no mínimo 5 caracteres")]
     public string Name { get; set; } = string.Empty;
