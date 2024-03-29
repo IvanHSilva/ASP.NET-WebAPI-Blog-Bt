@@ -28,7 +28,7 @@ public class CategoryController : ControllerBase {
     }
 
     [HttpPost("categories")]
-    public async Task<IActionResult> Post([FromBody] CategoryViewModel model, [FromServices] DataContext context) {
+    public async Task<IActionResult> Post([FromBody] Category model, [FromServices] DataContext context) {
         
         if (!ModelState.IsValid) 
             return BadRequest(new ResultViewModel<Category>(ModelState.GetErrors()));
@@ -47,7 +47,7 @@ public class CategoryController : ControllerBase {
     }
 
     [HttpPut("categories/{id:int}")]
-    public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CategoryViewModel model, 
+    public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Category model, 
         [FromServices] DataContext context) {
         
         Category category = await context.Categories.FirstAsync(c => c.Id == id);

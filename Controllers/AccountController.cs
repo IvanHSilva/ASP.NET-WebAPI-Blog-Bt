@@ -17,16 +17,16 @@ namespace Blog.Controllers;
 public class AccountController : ControllerBase {
 
     [HttpPost("accounts")]
-    public async Task<IActionResult> Post([FromBody]RegisterViewModel model,
-        [FromServices] EmailService emailService, [FromServices]DataContext context) {
+    public async Task<IActionResult> Post([FromBody] RegisterViewModel model,
+        [FromServices] EmailService emailService, [FromServices] DataContext context) {
 
-        if (!ModelState.IsValid) 
+        if (!ModelState.IsValid)
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
 
         User user = new() {
             Name = model.Name,
             Email = model.Email,
-            Slug = model.Email.Replace("@","-").Replace(".","-").ToLower(),
+            Slug = model.Email.Replace("@", "-").Replace(".", "-").ToLower(),
         };
 
         string password = PasswordGenerator.Generate(25);
@@ -40,7 +40,7 @@ public class AccountController : ControllerBase {
                 $"Sua senha é {password}");
 
             return Ok(new ResultViewModel<dynamic>(new {
-                user = user.Email, password 
+                user = user.Email, password
             }));
 
         } catch (DbUpdateException) {
@@ -51,12 +51,12 @@ public class AccountController : ControllerBase {
     //[AllowAnonymous]
     [HttpPost("accounts/login")]
     public async Task<IActionResult> Login([FromBody] LoginViewModel model,
-        [FromServices] DataContext context, 
+        [FromServices] DataContext context,
         [FromServices] TokenService tokenService) {
 
-        if (!ModelState.IsValid) 
-            return BadRequest(new ResultViewModel<string>(ModelState.GetErrors())); 
-        
+        if (!ModelState.IsValid)
+            return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
+
         User user = await context.Users.AsNoTracking(). //Include(u => u.Roles).
             FirstAsync(u => u.Email == model.Email);
 
@@ -66,7 +66,7 @@ public class AccountController : ControllerBase {
         if (!PasswordHasher.Verify(user.PasswordHash, model.Password))
             return StatusCode(401, new ResultViewModel<string>("Usuário ou senha inválidos!"));
 
-        try { 
+        try {
             string token = tokenService.GenerateToken(user);
             return Ok(new ResultViewModel<string>(token, null!));
         } catch (DbUpdateException) {
@@ -120,3 +120,4 @@ public class AccountController : ControllerBase {
         //[HttpGet("admin")]
         //public IActionResult GetAdmin() => Ok(User.Identity!.Name);
     }
+}
