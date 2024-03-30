@@ -4,6 +4,7 @@ using BlogEFCore.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 // Transiente - cria uma nova instância a cada referência ao objeto
 // Scoped - cria uma nova instância a cada requisição, reaproveitando o existente
@@ -55,7 +56,11 @@ void ConfigureAuthentication(WebApplicationBuilder builder) {
 
 void ConfigureMvc(WebApplicationBuilder builder) {
     builder.Services.AddControllers().ConfigureApiBehaviorOptions(
-    options => options.SuppressModelStateInvalidFilter = true);
+    options => options.SuppressModelStateInvalidFilter = true)
+        .AddJsonOptions(o => {
+            o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+        });
 }
 
 void ConfigureServices(WebApplicationBuilder builder) {
