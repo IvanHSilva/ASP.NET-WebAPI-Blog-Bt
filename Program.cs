@@ -2,6 +2,7 @@ using Blog;
 using Blog.Services;
 using BlogEFCore.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -21,8 +22,7 @@ ConfigureServices(builder);
 var app = builder.Build();
 LoadConfiguration(app);
 
-//app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
@@ -65,7 +65,8 @@ void ConfigureMvc(WebApplicationBuilder builder) {
 }
 
 void ConfigureServices(WebApplicationBuilder builder) {
-    builder.Services.AddDbContext<DataContext>();
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
     builder.Services.AddTransient<TokenService>();
     builder.Services.AddTransient<EmailService>();
 }
