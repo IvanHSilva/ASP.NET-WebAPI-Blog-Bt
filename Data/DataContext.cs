@@ -6,9 +6,7 @@ namespace BlogEFCore.Data;
 
 public class DataContext : DbContext
 {
-    public DataContext(DbContextOptions<DataContext> options) : base(options) {
-        
-    }
+    public DataContext(DbContextOptions<DataContext> options) : base(options) {}
 
     // private const string connectionString =
     // "Data Source=.\\SQLSERVER;Database=Blog;Integrated Security=True;Encrypt=False;";
