@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BlogEFCore.Models;
+namespace Blog.Models;
 
 public class User
 {
@@ -13,6 +13,6 @@ public class User
     public string Image { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
 
-    public IList<Post> Posts { get; set; } = default!;
-    public IList<Role> Roles { get; set; } = default!;
+    public ICollection<Post> Posts { get; set; } = [];
+    public ICollection<Role> Roles { get; set; } = [];
 }

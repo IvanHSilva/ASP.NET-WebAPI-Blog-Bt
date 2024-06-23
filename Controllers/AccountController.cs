@@ -2,8 +2,8 @@
 using Blog.Services;
 using Blog.ViewModels;
 using Blog.ViewModels.Accounts;
-using BlogEFCore.Data;
-using BlogEFCore.Models;
+using Blog.Data;
+using Blog.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +14,19 @@ namespace Blog.Controllers;
 
 [ApiController]
 [Route("v1")]
-public class AccountController : ControllerBase {
+public class AccountController : ControllerBase
+{
 
     [HttpPost("accounts")]
     public async Task<IActionResult> Post([FromBody] RegisterViewModel model,
-        [FromServices] EmailService emailService, [FromServices] DataContext context) {
+        [FromServices] EmailService emailService, [FromServices] DataContext context)
+    {
 
         if (!ModelState.IsValid)
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
 
-        User user = new() {
+        User user = new()
+        {
             Name = model.Name,
             Email = model.Email,
             Slug = model.Email.Replace("@", "-").Replace(".", "-").ToLower(),
@@ -32,18 +35,23 @@ public class AccountController : ControllerBase {
         string password = PasswordGenerator.Generate(25);
         user.PasswordHash = PasswordHasher.Hash(password);
 
-        try {
+        try
+        {
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
             emailService.Send(user.Name, user.Email, "Bem-vindo ao nosso blog.",
                 $"Sua senha é {password}");
 
-            return Ok(new ResultViewModel<dynamic>(new {
-                user = user.Email, password
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                user = user.Email,
+                password
             }));
 
-        } catch (DbUpdateException) {
+        }
+        catch (DbUpdateException)
+        {
             return StatusCode(400, new ResultViewModel<string>("E-Mail ja cadastrado"));
         }
     }
@@ -52,7 +60,8 @@ public class AccountController : ControllerBase {
     [HttpPost("accounts/login")]
     public async Task<IActionResult> Login([FromBody] LoginViewModel model,
         [FromServices] DataContext context,
-        [FromServices] TokenService tokenService) {
+        [FromServices] TokenService tokenService)
+    {
 
         if (!ModelState.IsValid)
             return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
@@ -66,10 +75,13 @@ public class AccountController : ControllerBase {
         if (!PasswordHasher.Verify(user.PasswordHash, model.Password))
             return StatusCode(401, new ResultViewModel<string>("Usuário ou senha inválidos!"));
 
-        try {
+        try
+        {
             string token = tokenService.GenerateToken(user);
             return Ok(new ResultViewModel<string>(token, null!));
-        } catch (DbUpdateException) {
+        }
+        catch (DbUpdateException)
+        {
             return StatusCode(500, new ResultViewModel<string>("Falha interna do servidor"));
         }
     }
@@ -78,30 +90,39 @@ public class AccountController : ControllerBase {
     [HttpPost("accounts/upload-image")]
     public async Task<IActionResult> UploadImage(
         [FromBody] UploadImageViewModel model,
-        [FromServices] DataContext context) {
+        [FromServices] DataContext context)
+    {
 
         string fileName = $"{Guid.NewGuid().ToString()}.jpg";
         string data = new Regex(@"^data image[a-z]+;base64,").
             Replace(model.Base64Image, "");
         byte[] bytes = Convert.FromBase64String(data);
 
-        try {
+        try
+        {
             await System.IO.File.WriteAllBytesAsync($"wwwroot/images/{fileName}", bytes);
-        } catch {
+        }
+        catch
+        {
             return StatusCode(500, new ResultViewModel<string>
                 ("Falha interna do servidor"));
         }
 
-        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email ==
+        User.Identity!.Name);
 
-        if (user == null) return NotFound(new ResultViewModel<Category>("Usuário não encontrado"));
+        if (user == null) return NotFound(new ResultViewModel<Category>
+        ("Usuário não encontrado"));
 
         user.Image = $"https://localhost:0000/images/{fileName}";
 
-        try {
+        try
+        {
             context.Users.Update(user);
             await context.SaveChangesAsync();
-        } catch {
+        }
+        catch
+        {
             return StatusCode(500, new ResultViewModel<string>
                 ("Falha interna do servidor"));
         }

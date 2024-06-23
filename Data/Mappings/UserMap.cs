@@ -1,8 +1,9 @@
-using BlogEFCore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BlogEFCore.Data.Mappings;
+using Blog.Models;
+
+namespace Blog.Data.Mappings;
 
 public class UserMap : IEntityTypeConfiguration<User>
 {

@@ -1,30 +1,42 @@
 ﻿using System.Net;
 using System.Net.Mail;
 
-namespace Blog.Services; 
+namespace Blog.Services;
 
-public class EmailService {
+public class EmailService
+{
 
-    public bool Send(string toName, string toEmail, string subject, string body, 
-        string fromName = "Ivan Henriques", string fromEmail = "ivanhenriquessilva@gmail.com"){
+    public bool Send(string toName, string toEmail, string subject, string body,
+        string fromName = "Ivan Henriques",
+        string fromEmail = "ivanhenriquessilva@gmail.com")
+    {
 
-        SmtpClient smtpClient = new(Configuration.Smtp.Host, int.Parse(Configuration.Smtp.Port));
-        smtpClient.Credentials = new NetworkCredential(Configuration.Smtp.UserName,
-            Configuration.Smtp.Password);
-        smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-        smtpClient.EnableSsl = true;
+        SmtpClient smtpClient = new(Configuration.Smtp.Host,
+        int.Parse(Configuration.Smtp.Port))
+        {
+            Credentials = new NetworkCredential(Configuration.Smtp.UserName,
+            Configuration.Smtp.Password),
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            EnableSsl = true
+        };
 
-        MailMessage mail = new();
-        mail.From = new MailAddress(fromEmail, fromName);
+
+        MailMessage mail = new()
+        {
+            From = new MailAddress(fromEmail, fromName),
+            Subject = subject,
+            Body = body,
+            IsBodyHtml = true
+        };
         mail.To.Add(new MailAddress(toEmail, toName));
-        mail.Subject = subject;
-        mail.Body = body;
-        mail.IsBodyHtml = true;
 
-        try {
+        try
+        {
             smtpClient.Send(mail);
             return true;
-        } catch {
+        }
+        catch
+        {
             return false;
         }
     }

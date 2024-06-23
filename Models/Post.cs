@@ -1,4 +1,4 @@
-namespace BlogEFCore.Models;
+namespace Blog.Models;
 
 public class Post
 {
@@ -8,15 +8,12 @@ public class Post
     public string Summary { get; set; } = string.Empty;
     public string Body { get; set; } = string.Empty;
 
-    public DateTime CreateDate { get; set; }
-    public DateTime LastUpdateDate { get; set; }
+    public DateTime CreateDate { get; set; } = DateTime.UtcNow;
+    public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
 
-    // public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
-
-    // public int AuthorId { get; set; }
     public User Author { get; set; } = null!;
 
-    public IList<Tag> Tags { get; set; } = null!;
+    public ICollection<Tag> Tags { get; set; } = [];
 }
 

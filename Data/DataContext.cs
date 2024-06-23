@@ -1,22 +1,14 @@
-using BlogEFCore.Data.Mappings;
-using BlogEFCore.Models;
+using Blog.Data.Mappings;
+using Blog.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogEFCore.Data;
+namespace Blog.Data;
 
-public class DataContext : DbContext
+public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
-    public DataContext(DbContextOptions<DataContext> options) : base(options) {}
-
-    // private const string connectionString =
-    // "Data Source=.\\SQLSERVER;Database=Blog;Integrated Security=True;Encrypt=False;";
-
     public DbSet<User> Users { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Post> Posts { get; set; }
-
-    //protected override void OnConfiguring(DbContextOptionsBuilder options)
-    //    => options.UseSqlServer(connectionString);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,11 +1,14 @@
-﻿using BlogEFCore.Models;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace Blog.Extensions; 
+using Blog.Models;
 
-public static class RoleClaimsExtension {
+namespace Blog.Extensions;
 
-    public static IEnumerable<Claim> GetClaims(this User user) {
+public static class RoleClaimsExtension
+{
+
+    public static IEnumerable<Claim> GetClaims(this User user)
+    {
 
         List<Claim> result = [
             new(ClaimTypes.Name, user.Email)
